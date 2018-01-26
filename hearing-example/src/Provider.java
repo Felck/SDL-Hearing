@@ -1,15 +1,15 @@
 import java.util.ArrayList;
 import java.util.ListIterator;
 
-import org.eclipse.swt.graphics.Point;
-
 public class Provider {
+	public String id;
 	private Route route;
 	private double reach;
 	
-	public Provider(int home_x, int home_y, int reach) {
+	public Provider(String id, int home_x, int home_y, int reach) {
+		this.id = id;
 		route = new Route();
-		route.addPoint(home_x, home_y);
+		route.addWaypoint(home_x, home_y);
 		this.reach = reach;
 	}
 	
@@ -26,16 +26,16 @@ public class Provider {
 		ArrayList<Offer> offers = new ArrayList<Offer>();
 		Route tmpOffer;
 		
-		for(Point p : stops) {
+		for(Waypoint p : stops) {
 			for(ListIterator<Offer> it = offers.listIterator(); it.hasNext();) {
 				Offer o = it.next();
-				tmpOffer = o.route.insertPoint(p);
+				tmpOffer = o.route.insertWaypoint(p);
 				if(tmpOffer.length() <= reach)
-					it.add(new Offer(tmpOffer.length()-ownLength, tmpOffer));				
+					it.add(new Offer(id, tmpOffer.length()-ownLength, tmpOffer, o.usedStops.addWaypointAndClone(p)));				
 			}
-			tmpOffer = route.insertPoint(p);
+			tmpOffer = route.insertWaypoint(p);
 			if(tmpOffer.length() <= reach)
-				offers.add(new Offer(tmpOffer.length()-ownLength, tmpOffer));
+				offers.add(new Offer(id, tmpOffer.length()-ownLength, tmpOffer, new WaypointSet(p)));
 		}
 		
 		return offers;

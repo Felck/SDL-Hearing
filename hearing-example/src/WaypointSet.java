@@ -1,28 +1,45 @@
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import org.eclipse.swt.graphics.Point;
-
 /**
  * unordered set of waypoints
  */
-public class WaypointSet implements Iterable<Point> {
+public class WaypointSet implements Iterable<Waypoint> {
 	// first element should be interpreted as home/warehouse
-	protected ArrayList<Point> stops;
+	protected ArrayList<Waypoint> stops;
 
 	public WaypointSet() {
-		stops = new ArrayList<Point>();
+		stops = new ArrayList<Waypoint>();
 	}
 	
-	public void addPoint(int x, int y) {
-		stops.add(new Point(x, y));
+	public WaypointSet(Waypoint p) {
+		this();
+		stops.add(p);
+	}
+	
+	public WaypointSet(WaypointSet wps) {
+		stops = (ArrayList<Waypoint>) wps.stops.clone();
+	}
+	
+	public void addWaypoint(int x, int y) {
+		stops.add(new Waypoint(x, y));
+	}
+	
+	public void addWaypoint(int x, int y, int priority) {
+		stops.add(new Waypoint(x, y, priority));
 	}
 
-	public void addPoint(Point point) {
-		stops.add(point);
+	public void addWaypoint(Waypoint p) {
+		stops.add(p);
+	}
+	
+	public WaypointSet addWaypointAndClone(Waypoint p) {
+		WaypointSet newWPS = new WaypointSet(this);
+		newWPS.addWaypoint(p);
+		return newWPS;
 	}
 
-	public void removePoint(Point p) {
+	public void removeWaypoint(Waypoint p) {
 		if(stops.size() > 1)
 			stops.remove(p);
 	}
@@ -32,7 +49,7 @@ public class WaypointSet implements Iterable<Point> {
 	}
 
 	@Override
-	public Iterator<Point> iterator() {
+	public Iterator<Waypoint> iterator() {
 		return stops.iterator();
 	}
 }

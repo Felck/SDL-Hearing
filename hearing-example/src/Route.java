@@ -1,7 +1,7 @@
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.stream.IntStream;
-
-import org.eclipse.swt.graphics.Point;
 
 /**
  * ordered list of waypoints
@@ -12,79 +12,68 @@ public class Route extends WaypointSet {
 		super();
 	}
 	
+	@SuppressWarnings("unchecked")
 	public Route(Route route) {
-		this();
-		for(Point p : route) {
-			addPoint(p.x, p.y);
-		}
+		super();
+		stops = (ArrayList<Waypoint>) route.stops.clone();
 	}
 	
-	public void addPoint(int index, int x, int y) {
-		stops.add(index, new Point(x, y));
+	public void addWaypoint(int index, Waypoint p) {
+		stops.add(index, p);
 	}
 	
-	public void addPoint(Point pos, Point newPoint) {
-		stops.add(stops.indexOf(pos)+1, newPoint);
+	public void addWaypoint(Waypoint pos, Waypoint newWaypoint) {
+		stops.add(stops.indexOf(pos)+1, newWaypoint);
 	}
 	
-	public Route insertPoint(Point p) {
+	public Route insertWaypoint(Waypoint p) {
 		Route newRoute = new Route(this);
-		int x = p.x, y = p.y;
-		if(newRoute.size() < 3)
-			newRoute.addPoint(x, y);
-		else {
-			int nearestIndex = getNearest(x, y);
-			int size = newRoute.size();
-			int prevIndex = (nearestIndex - 1 + size) % size;
-			int postIndex = (nearestIndex + 1 + size) % size;
-			Point prev = newRoute.getPoint(prevIndex);
-			Point post = newRoute.getPoint(postIndex);
-			
-			int insertIndex;
-			if(Utils.distance(prev.x, prev.y, x, y) < Utils.distance(post.x, post.y, x, y))
-				insertIndex = nearestIndex;
-			else
-				insertIndex = nearestIndex+1;
-			
-			newRoute.addPoint(insertIndex, x, y);
+		if(p.priority == -1) {
+			newRoute.addWaypoint(getNearest(p.x, p.y)+1, p);	
+		} else {
+			int nearestIndex;
+			for(Iterator<Integer> it = getNearestIterator(p.x, p.y); it.hasNext();) {
+				nearestIndex = it.next();
+				int minPrio = -1, maxPrio = -1, time = 0;
+				for(int i=0; i<=nearestIndex; i++) {
+					if(minPrio < newRoute.stops.get(i).priority) {
+						minPrio = newRoute.stops.get(i).priority;
+					}
+					time += Utils.distance(newRoute.stops.get(i), newRoute.stops.get(i+1));
+				}
+				time += Utils.distance(newRoute.stops.get(nearestIndex), p);
+				for(int i=nearestIndex+1; i<newRoute.stops.size(); i++) {
+					if(newRoute.stops.get(i).priority != -1) {
+						maxPrio = newRoute.stops.get(i).priority;
+						break;
+					}
+				}
+				if((minPrio == -1 || minPrio <= p.priority) && (maxPrio == -1 || maxPrio >= p.priority) &&
+						(p.minTime == -1 || p.minTime < time) && (p.maxTime == -1 || p.maxTime > time)) {
+					newRoute.addWaypoint(nearestIndex+1, p);
+					break;
+				}
+			}
 		}
 		return newRoute;
 	}
 	
-	/*public Route merge(Route route) {
-		Route merged = new Route(this);
-		for(Point p : route) {
-			int x = p.x, y = p.y;
-			if(merged.size() < 3)
-				merged.addPoint(x, y);
-			else {
-				int nearestIndex = getNearest(x, y);
-				int size = merged.size();
-				int prevIndex = (nearestIndex - 1 + size) % size;
-				int postIndex = (nearestIndex + 1 + size) % size;
-				Point prev = merged.getPoint(prevIndex);
-				Point post = merged.getPoint(postIndex);
-				
-				int insertIndex;
-				if(Utils.distance(prev.x, prev.y, x, y) < Utils.distance(post.x, post.y, x, y))
-					insertIndex = nearestIndex;
-				else
-					insertIndex = nearestIndex+1;
-				
-				merged.addPoint(insertIndex, x, y);
-			}
-		}
-		return merged;
-	}*/
-	
 	public int getNearest(int x, int y) {
 		return IntStream.range(0,stops.size()).boxed()
-	            .min(Comparator.comparing(i -> {Point p = stops.get(i);
-	    				return Utils.distance(p.x, p.y, x, y);}))
+	            .min(Comparator.comparing(i -> {
+					Waypoint p1 = stops.get(i), p2 = stops.get((i+1)%stops.size());
+					return Utils.distance(p1.x, p1.y, x, y) + Utils.distance(p2.x, p2.y, x, y);}))
 	            .get();
 	}
 	
-	public Point getPoint(int index) {
+	public  Iterator<Integer> getNearestIterator(int x, int y) {
+		return IntStream.range(0,stops.size()).boxed().sorted(Comparator.comparing(i -> {
+						Waypoint p1 = stops.get(i), p2 = stops.get((i+1)%stops.size());
+						return Utils.distance(p1.x, p1.y, x, y) + Utils.distance(p2.x, p2.y, x, y);}))
+				.iterator();
+	}
+	
+	public Waypoint getWaypoint(int index) {
 		return stops.get(index);
 	}
 	
