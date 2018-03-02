@@ -13,6 +13,11 @@ import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.ShellAdapter;
 import org.eclipse.swt.events.ShellEvent;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.widgets.Label;
 
 public class MainWindow {
 
@@ -109,9 +114,9 @@ public class MainWindow {
 				selectionPoint.x = e.x;
 				selectionPoint.y = e.y;
 				selectionPoint = null;
-				canvas.redraw();
-				computeOffers();
 			}
+			canvas.redraw();
+			computeOffers();
 		}
 	}
 
@@ -143,14 +148,12 @@ public class MainWindow {
 		Display display = Display.getDefault();
 		createContents();
 		initParties();
+		shell.open();
+		shell.layout();
 		offersShell = new OffersShell(display, this);
 		offersShell.setVisible(true);
 		offersShell.layout();
-		createContents();
-		initParties();
 		computeOffers();
-		shell.open();
-		shell.layout();
 
 		while (!shell.isDisposed()) {
 			if (!display.readAndDispatch()) {
@@ -166,10 +169,10 @@ public class MainWindow {
 		shell = new Shell();
 		shell.addShellListener(new ShellAdapter() {
 			public void shellClosed(ShellEvent e) {
-				shell.dispose();
+				shell.dispose(); //nötig?
 			}
 		});
-		shell.setSize(450, 300);
+		shell.setSize(600, 400);
 		shell.setText("SDL Hearing");
 		shell.setLayout(new GridLayout(2, false));
 
@@ -177,6 +180,28 @@ public class MainWindow {
 		canvas.addMouseListener(new CanvasMouseAdapter(canvas));
 		canvas.addPaintListener(new CanvasPaintListener());
 		canvas.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 4));
+		
+		Menu menu = new Menu(shell, SWT.BAR);
+		shell.setMenuBar(menu);
+		
+		MenuItem mntmRoute = new MenuItem(menu, SWT.CASCADE);
+		mntmRoute.setText("Route");
+		
+		Menu menu_1 = new Menu(mntmRoute);
+		mntmRoute.setMenu(menu_1);
+		
+		MenuItem mntmNewRoute = new MenuItem(menu_1, SWT.NONE);
+		mntmNewRoute.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				RouteGeneratorDialog rgd = new RouteGeneratorDialog(MainWindow.this);
+				providers.add(rgd.open());
+				canvas.redraw();
+				computeOffers();
+			}
+		});
+		mntmNewRoute.setText("Neue Route");
+		new Label(shell, SWT.NONE);
 	}
 
 	private void initParties() {
@@ -200,14 +225,19 @@ public class MainWindow {
 
 	private void computeOffers() {
 		selectedOffer = null;
-		offersShell.clearOffers();
+		requestor.clearOffers();
 		for(Provider provider : providers) {
-			offersShell.addOffers(provider.getOffer(requestor.getStops()));			
+			requestor.addOffers(provider.getOffer(requestor.getStops()));			
 		}
+		offersShell.updateOffers();
 	}
 	
 	public void setSelectedOffer(Offer offer) {
 		selectedOffer = offer;
 		shell.redraw();
+	}
+	
+	public Requestor getRequestor() {
+		return requestor;
 	}
 }

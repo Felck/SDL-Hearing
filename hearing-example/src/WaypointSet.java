@@ -17,6 +17,7 @@ public class WaypointSet implements Iterable<Waypoint> {
 		stops.add(p);
 	}
 	
+	@SuppressWarnings("unchecked")
 	public WaypointSet(WaypointSet wps) {
 		stops = (ArrayList<Waypoint>) wps.stops.clone();
 	}
