@@ -217,7 +217,7 @@ public class MainWindow {
 		providers.get(1).getRoute().addWaypoint(230, 160);
 		providers.get(1).getRoute().addWaypoint(180, 30);
 
-		requestor = new Requestor();
+		requestor = new Requestor(1000);
 		requestor.getStops().addWaypoint(150, 140, 3);
 		requestor.getStops().addWaypoint(215, 145, 1);
 		requestor.getStops().addWaypoint(190, 190, 2);

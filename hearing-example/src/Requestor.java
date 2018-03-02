@@ -1,13 +1,13 @@
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.ListIterator;
 
 public class Requestor {
 	private WaypointSet stops = new WaypointSet();
 	private ArrayList<Offer> offers = new ArrayList<Offer>();
-	private int priceLimit = 1000; //TODO changeable
+	private int priceLimit;
 	
-	public Requestor() {
+	public Requestor(int priceLimit) {
+		this.priceLimit = priceLimit;
 	}
 
 	public WaypointSet getStops() {
