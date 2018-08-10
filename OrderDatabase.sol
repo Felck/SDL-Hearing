@@ -1,6 +1,6 @@
 pragma solidity ^0.4.21;
 contract OrderDatabase {
-    event NewOderPlaced(
+    event NewOrderPlaced(
         address orderer,
         uint orderID
     );
@@ -25,11 +25,11 @@ contract OrderDatabase {
 
     function placeOrder(string data) public returns (uint id) {
         // create new order instance and get id
-        uint orderID = (orders[msg.sender].length++) - 1;
+        uint orderID = orders[msg.sender].length++;
         // insert data
         orders[msg.sender][orderID].data = data;
         // emit event
-        emit NewOderPlaced(msg.sender, orderID);
+        emit NewOrderPlaced(msg.sender, orderID);
         return orderID;
     }
 
@@ -109,7 +109,7 @@ contract OrderDatabase {
         // require existence of specified offer
         require(o.offers[offerer].length > offerID);
         // add offer to accepted ones
-        uint index = (o.accepted.length++) - 1;
+        uint index = o.accepted.length++;
         o.accepted[index].offerer = offerer;
         o.accepted[index].id = offerID;
     }
