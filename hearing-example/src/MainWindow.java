@@ -21,6 +21,7 @@ import org.eclipse.swt.widgets.Label;
 
 public class MainWindow {
 
+	// PaintListener for drawing
 	private final class CanvasPaintListener implements PaintListener {
 		public void paintControl(PaintEvent e) {
 			// providers
@@ -61,6 +62,7 @@ public class MainWindow {
 		}
 	}
 
+	// Listener for mouse events on canvas
 	private final class CanvasMouseAdapter extends MouseAdapter {
 		private final Canvas canvas;
 
@@ -69,19 +71,20 @@ public class MainWindow {
 		}
 
 		public void mouseDown(MouseEvent e) {
+			// providers
 			for (Provider party : providers) {
 				for (Waypoint point : party.getRoute()) {
 					if (Utils.distance(point.x, point.y, e.x, e.y) < 10) {
 						switch (e.stateMask) {
-						case SWT.SHIFT:
+						case SWT.SHIFT: // add waypoint
 							Waypoint newPoint = new Waypoint(0, 0);
 							party.getRoute().addWaypoint(point, newPoint);
 							selectionPoint = newPoint;
 							break;
-						case SWT.CTRL:
+						case SWT.CTRL: // delete waypoint
 							party.getRoute().removeWaypoint(point);
 							break;
-						default:
+						default: // select waypoint to drag
 							selectionPoint = point;
 							break;
 						}
@@ -89,18 +92,19 @@ public class MainWindow {
 					}
 				}
 			}
+			// requestor
 			for (Waypoint point : requestor.getStops()) {
 				if (Utils.distance(point.x, point.y, e.x, e.y) < 10) {
 					switch (e.stateMask) {
-					case SWT.SHIFT:
+					case SWT.SHIFT: // add waypoint
 						Waypoint newPoint = new Waypoint(0, 0);
 						requestor.getStops().addWaypoint(newPoint);
 						selectionPoint = newPoint;
 						break;
-					case SWT.CTRL:
+					case SWT.CTRL: // delete waypoint
 						requestor.getStops().removeWaypoint(point);
 						break;
-					default:
+					default: // select waypoint to drag
 						selectionPoint = point;
 						break;
 					}
@@ -110,11 +114,13 @@ public class MainWindow {
 		}
 
 		public void mouseUp(MouseEvent e) {
+			// drag selected waypoint to position of mouseUp event
 			if (selectionPoint != null) {
 				selectionPoint.x = e.x;
 				selectionPoint.y = e.y;
 				selectionPoint = null;
 			}
+			// redraw canvas and calc best offers
 			canvas.redraw();
 			computeOffers();
 		}
@@ -124,8 +130,8 @@ public class MainWindow {
 	private OffersShell offersShell;
 	private ArrayList<Provider> providers;
 	private Requestor requestor;
-	private Waypoint selectionPoint = null;
-	private Offer selectedOffer = null;
+	private Waypoint selectionPoint = null; // for dragging
+	private Offer selectedOffer = null; // for highlighting specific offers
 
 	/**
 	 * Launch the application.

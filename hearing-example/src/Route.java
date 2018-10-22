@@ -39,7 +39,7 @@ public class Route extends WaypointSet {
 					if(minPrio < newRoute.stops.get(i).priority) {
 						minPrio = newRoute.stops.get(i).priority;
 					}
-					time += Utils.distance(newRoute.stops.get(i), newRoute.stops.get(i+1));
+					time += Utils.distance(newRoute.stops.get(i), newRoute.stops.get((i+1)%stops.size()));
 				}
 				time += Utils.distance(newRoute.stops.get(nearestIndex), p);
 				for(int i=nearestIndex+1; i<newRoute.stops.size(); i++) {
@@ -69,8 +69,8 @@ public class Route extends WaypointSet {
 	public  Iterator<Integer> getNearestIterator(int x, int y) {
 		return IntStream.range(0,stops.size()).boxed().sorted(Comparator.comparing(i -> {
 						Waypoint p1 = stops.get(i), p2 = stops.get((i+1)%stops.size());
-						return Utils.distance(p1.x, p1.y, x, y) + Utils.distance(p2.x, p2.y, x, y);}))
-				.iterator();
+						return Utils.distance(p1.x, p1.y, x, y) + Utils.distance(p2.x, p2.y, x, y);
+					})).iterator();
 	}
 	
 	public Waypoint getWaypoint(int index) {

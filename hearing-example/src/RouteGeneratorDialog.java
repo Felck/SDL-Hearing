@@ -15,8 +15,9 @@ public class RouteGeneratorDialog extends Dialog {
 	private Provider provider;
 
 	/**
-	 * Create the shell.
-	 * @param display
+	 * Create dialog for adding new routes. 
+	 * TODO: proper generation algorithm
+	 * @param root window
 	 */
 	public RouteGeneratorDialog(MainWindow mw) {
 		super(mw.shell, SWT.DIALOG_TRIM);
@@ -64,7 +65,7 @@ public class RouteGeneratorDialog extends Dialog {
 		btnOK.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				//TODO
+				//TODO generation algorithm
 				provider = new Provider(txtName.getText(), 10, 10, 1000);
 				int stopNumber = Integer.parseInt(txtStopNumber.getText());
 				for(int i=1; i<stopNumber; i++) {
